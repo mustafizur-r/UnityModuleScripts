@@ -1,6 +1,6 @@
 # UnityModuleScripts
 
-##PassthroughDrawPointer
+## PassthroughDrawPointer
 
 ✅ Press "Create Path" Button → Enables drawing mode (but doesn’t start drawing).
 
@@ -14,6 +14,6 @@
 
 
 
-##SpawnBall
+## SpawnBall
 
 ✅ Press & Hold Left Trigger → Shows SpawnBall dynamically as you move.
