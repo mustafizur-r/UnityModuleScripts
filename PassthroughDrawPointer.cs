@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 
 public class PassthroughDrawPointer : MonoBehaviour
 {
     public GameObject linePrefab; // Prefab for LineRenderer
     public GameObject pathSegmentPrefab; // Prefab for path segments (cylinders)
+    public Material roadMaterial;
 
     private LineRenderer currentLine;
     private List<Vector3> points = new List<Vector3>();
@@ -21,10 +22,12 @@ public class PassthroughDrawPointer : MonoBehaviour
         isDrawing = true;  // Set flag to allow drawing
     }
 
-    // Clear all paths when "Clear Path" button is pressed
     public void ClearPath()
     {
         Debug.Log("Clear Path");
+
+        // Stop drawing
+        isDrawing = false;
 
         // Destroy all line objects
         if (currentLine != null)
@@ -100,10 +103,33 @@ public class PassthroughDrawPointer : MonoBehaviour
         }
     }
 
-    // Convert the drawn LineRenderer path to prefab segments
+    //// Convert the drawn LineRenderer path to prefab segments
+    //void ConvertToPathSegments()
+    //{
+    //    Debug.Log("Converting LineRenderer to Prefab Segments");
+
+    //    for (int i = 1; i < points.Count; i++)
+    //    {
+    //        Vector3 startPoint = points[i - 1];
+    //        Vector3 endPoint = points[i];
+    //        Vector3 direction = (endPoint - startPoint).normalized;
+    //        float distance = Vector3.Distance(startPoint, endPoint);
+
+    //        GameObject segment = Instantiate(pathSegmentPrefab, startPoint, Quaternion.LookRotation(direction));
+    //        segment.transform.localScale = new Vector3(segment.transform.localScale.x, segment.transform.localScale.y, distance);
+    //        segment.transform.position = startPoint + direction * (distance / 2);
+
+    //        pathSegments.Add(segment);
+    //    }
+
+    //    Destroy(currentLine.gameObject); // Remove LineRenderer after replacing with prefabs
+    //    currentLine = null;
+    //    points.Clear(); // Reset points for the next drawing
+    //}
+
     void ConvertToPathSegments()
     {
-        Debug.Log("Converting LineRenderer to Prefab Segments");
+        Debug.Log("Converting LineRenderer to Road Segments");
 
         for (int i = 1; i < points.Count; i++)
         {
@@ -112,15 +138,29 @@ public class PassthroughDrawPointer : MonoBehaviour
             Vector3 direction = (endPoint - startPoint).normalized;
             float distance = Vector3.Distance(startPoint, endPoint);
 
-            GameObject segment = Instantiate(pathSegmentPrefab, startPoint, Quaternion.LookRotation(direction));
-            segment.transform.localScale = new Vector3(segment.transform.localScale.x, segment.transform.localScale.y, distance);
-            segment.transform.position = startPoint + direction * (distance / 2);
+            // Instantiate the road segment
+            GameObject roadSegment = Instantiate(pathSegmentPrefab, startPoint, Quaternion.identity);
 
-            pathSegments.Add(segment);
+            // Adjust scale: width = 2m, length = distance
+            roadSegment.transform.localScale = new Vector3(2f, 0.01f, distance * 2f); // Small increase in length (1.1x)
+
+            // Position: Shift slightly back to overlap with the previous segment
+            roadSegment.transform.position = startPoint + direction * (distance / 2 * 0.95f);
+
+            // Rotate to align with the road direction
+            roadSegment.transform.rotation = Quaternion.LookRotation(direction);
+
+            pathSegments.Add(roadSegment);
         }
 
-        Destroy(currentLine.gameObject); // Remove LineRenderer after replacing with prefabs
+        // Remove LineRenderer after replacing with prefabs
+        Destroy(currentLine.gameObject);
         currentLine = null;
         points.Clear(); // Reset points for the next drawing
     }
+
+
+
+
+
 }
