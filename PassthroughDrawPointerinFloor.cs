@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Meta.XR.MRUtilityKit;
+using TMPro;
 
 public class PassthroughDrawPointer : MonoBehaviour
 {
@@ -8,10 +9,13 @@ public class PassthroughDrawPointer : MonoBehaviour
     public GameObject pathSegmentPrefab; // Prefab for path segments (cylinders)
     public Material roadMaterial;
 
+
     public Transform rayStartPoint;
     public float rayLength = 5;
     public MRUKAnchor.SceneLabels labelFilter;
     public TMPro.TextMeshPro debugText;
+    public TextMeshProUGUI statusText;
+
 
     private LineRenderer currentLine;
     private List<Vector3> points = new List<Vector3>();
@@ -20,17 +24,26 @@ public class PassthroughDrawPointer : MonoBehaviour
     private List<GameObject> pathSegments = new List<GameObject>(); // Stores all path segments
 
     // Method to start drawing when "Create Path" button is pressed
+    public void Start()
+    {
+        statusText.text = "Please Click a Button to Continue!";
+        statusText.color = Color.red;
+    }
     public void StartCreatingPath()
     {
         if (isDrawing) return;  // Prevent multiple activations
 
-        Debug.Log("Path Drawing Enabled");
+        Debug.Log("Path Drawing Mode Enabled");
+        statusText.text = "Path Drawing Mode Enabled!";
+        statusText.color = Color.green;
         isDrawing = true;  // Set flag to allow drawing
     }
 
     public void ClearPath()
     {
         Debug.Log("Clear Path");
+        statusText.text = "Path Cleared Successfully!";
+        statusText.color = Color.green;
 
         // Stop drawing
         isDrawing = false;
@@ -49,25 +62,13 @@ public class PassthroughDrawPointer : MonoBehaviour
         }
         pathSegments.Clear();
         points.Clear();  // Clear points list
+
+        if (debugText != null)
+        {
+
+            debugText.text = "";
+        }
     }
-
-    //// Update function to check trigger press/release
-    //void Update()
-    //{
-    //    if (!isDrawing) return; // Only allow drawing if "Create Path" was pressed
-
-    //    // If trigger is pressed, start drawing
-    //    if (OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
-    //    {
-    //        DrawPath();
-    //    }
-    //    // If trigger is released, convert to prefab segments
-    //    else if (currentLine != null && points.Count > 1)
-    //    {
-    //        ConvertToPathSegments();
-    //    }
-    //}
-
     // Update function to check trigger press/release
     void Update()
     {
@@ -109,31 +110,16 @@ public class PassthroughDrawPointer : MonoBehaviour
             {
                 // If the ray hit something that isn't the floor, show an error message
                 debugText.text = "ANCHOR : " + label + "\nError: Draw is not possible!";
+                debugText.color = Color.red;
             }
         }
         else
         {
             // If the ray hits nothing, you can also show an error message (optional)
             debugText.text = "Error: No valid surface detected!";
+            debugText.color = Color.red;
         }
     }
-
-    //// Draw the path with LineRenderer in real-time
-    //void DrawPath()
-    //{
-    //    Vector3 rayOrigin = OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch);
-    //    Vector3 rayDirection = OVRInput.GetLocalControllerRotation(OVRInput.Controller.RTouch) * Vector3.forward;
-    //    RaycastHit hit;
-
-    //    if (Physics.Raycast(rayOrigin, rayDirection, out hit, 10f))
-    //    {
-    //        if (currentLine == null)
-    //        {
-    //            StartNewLine(hit.point);
-    //        }
-    //        UpdateLine(hit.point);
-    //    }
-    //}
 
     // Draw the path with LineRenderer in real-time
     void DrawPath(Vector3 hitPoint)
