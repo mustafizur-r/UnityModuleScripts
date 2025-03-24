@@ -17,3 +17,6 @@
 ## 2. SpawnBall
 
 ✅ Press & Hold Left Trigger → Shows SpawnBall dynamically as you move.
+
+## 3. Display the MRUK room label
+✅ Hit with the raycast → Shows Room Labels(i.e Floor, Wall)
