@@ -173,17 +173,19 @@ public class PassthroughDrawPointerWithPhoton : NetworkBehaviour
             Quaternion rotation = Quaternion.LookRotation(direction);
             Vector3 scale = new Vector3(2f, 0.01f, distance * 2f);
 
+            GameObject tempSegment = Instantiate(pathSegmentPrefab);
+            tempSegment.transform.localScale = scale;
+
             // Spawn using Fusion networking
             if (Runner != null && pathSegmentPrefab != null)
             {
                 NetworkObject segment = Runner.Spawn(
-                    pathSegmentPrefab,
-                    position,
-                    rotation
-                );
+                    tempSegment,
+                    position + new Vector3(0,0.05f,0),
+                    rotation,
+                    Object.InputAuthority
 
-                // Adjust scale manually (may not sync properly with TransformSync)
-                segment.transform.localScale = scale;
+                );
 
                 // Optionally disable collider
                 if (segment.TryGetComponent(out Collider col))
