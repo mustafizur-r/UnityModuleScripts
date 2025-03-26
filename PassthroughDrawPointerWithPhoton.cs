@@ -4,7 +4,7 @@ using Meta.XR.MRUtilityKit;
 using TMPro;
 using Fusion;
 
-public class PassthroughDrawPointer : NetworkBehaviour
+public class PassthroughDrawPointerWithPhoton : NetworkBehaviour
 {
     [Header("Prefab Settings")]
     public GameObject linePrefab;              // Prefab for LineRenderer
