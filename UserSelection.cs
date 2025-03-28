@@ -1,3 +1,5 @@
+using Fusion;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +14,7 @@ public class UserSelection : MonoBehaviour
     public GameObject TherapistPanel;
     public GameObject PatientPanel;
     public GameObject DebuglText;
+    public TMP_Text connectingStatusText;
 
     // Reference to the UserSelection UI (the panel or parent object that contains the buttons)
     public GameObject userSelectionUI;
@@ -26,6 +29,10 @@ public class UserSelection : MonoBehaviour
         if (TherapistPanel != null) TherapistPanel.SetActive(false);
         if (PatientPanel != null) PatientPanel.SetActive(false);
         if (DebuglText != null) DebuglText.SetActive(false);
+        // Set Button false until connection is established.
+        therapistButton.GetComponent<Button>().interactable = false;
+        patientButton.GetComponent<Button>().interactable = false;
+
 
         // Ensure the UserSelection UI is enabled at the start
         if (userSelectionUI != null)
@@ -80,7 +87,7 @@ public class UserSelection : MonoBehaviour
             EffectMesh.SetActive(false);
             TherapistPanel.SetActive(false);
             DebuglText.SetActive(false);
-            DebuglText.SetActive(true);
+            PatientPanel.SetActive(true);
         }
     }
 
@@ -91,4 +98,24 @@ public class UserSelection : MonoBehaviour
         PlayerPrefs.DeleteKey(UserSelectionKey);
         PlayerPrefs.Save();
     }
+
+    public void SetText()
+    {
+        if (connectingStatusText != null)
+        {
+            connectingStatusText.text = "Connected !!";
+            connectingStatusText.color = Color.green;
+        }
+        else
+        {
+            Debug.LogWarning("TMP_Text is not set.");
+        }
+    }
+    public void SetButtonActive()
+    {
+        therapistButton.GetComponent<Button>().interactable = true;
+        patientButton.GetComponent<Button>().interactable = true;
+    }
+
+
 }
