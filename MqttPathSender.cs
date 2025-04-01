@@ -9,9 +9,9 @@ public class MqttPathSender : MonoBehaviour
 {
     private MqttClient client;
     public string brokerAddress = "127.0.0.1";
-    public int brokerPort = 1883;
+    public int brokerPort = 8000;
     public string topic4jsonData = "robot/path/json";
-    public string topic4binaryData = "robot/path/bin";
+    public string topic4byteData = "robot/path/byte";
 
     [Serializable]
     public class PathPoint
@@ -64,7 +64,7 @@ public class MqttPathSender : MonoBehaviour
     //    Debug.Log("Path published to MQTT topic: " + topic);
     //}
 
-    //for sending path points
+
     public void SendPath(List<Vector3> pathPoints)
     {
         if (client == null || !client.IsConnected)
@@ -91,7 +91,7 @@ public class MqttPathSender : MonoBehaviour
             binaryBytes.AddRange(BitConverter.GetBytes(pt.y)); // using x and y only
         }
 
-        client.Publish(topic4binaryData, binaryBytes.ToArray());
+        client.Publish(topic4byteData, binaryBytes.ToArray());
         Debug.Log("Binary path sent.");
     }
 
