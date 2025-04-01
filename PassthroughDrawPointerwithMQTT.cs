@@ -513,19 +513,33 @@ public class PassthroughDrawPointer : NetworkBehaviour
     }
 
 
+    //public void SendPathToRobot()
+    //{
+    //    if (mqttSender != null)
+    //    {
+    //        string json = GetPathAsJson();
+    //        mqttSender.PublishPath(json);
+    //        SetStatus("Path sent to robot!", Color.cyan);
+    //    }
+    //    else
+    //    {
+    //        Debug.LogWarning("No MQTT sender attached!");
+    //    }
+    //}
+
     public void SendPathToRobot()
     {
         if (mqttSender != null)
         {
-            string json = GetPathAsJson();
-            mqttSender.PublishPath(json);
-            SetStatus("Path sent to robot!", Color.cyan);
+            mqttSender.SendPath(finalPathPoints); // use saved path
+            SetStatus("Path sent (JSON + Binary)", Color.cyan);
         }
         else
         {
-            Debug.LogWarning("No MQTT sender attached!");
+            Debug.LogWarning("MQTT sender is missing.");
         }
     }
+
 
 
 }
