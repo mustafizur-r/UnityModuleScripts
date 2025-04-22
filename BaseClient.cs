@@ -6,6 +6,10 @@ using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 using M2MqttUnity;
 using System.Collections;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using UnityEngine.Android;
 
 namespace M2MqttUnity
 {
@@ -14,6 +18,8 @@ namespace M2MqttUnity
         void Start()
         {
             autoConnect = false; // disable auto-connect on Start if needed
+            brokerAddress = GetDynamicBrokerIP();
+            Debug.Log($"MQTT Broker address set to: {brokerAddress}");
             StartAutoReconnect();
         }
         [Serializable]
@@ -36,6 +42,7 @@ namespace M2MqttUnity
         public double[] relativeTrajectoryDouble;
 
         public string topic = "M2MQTT_Unity/test";
+        public string brokerIPLastDigit = "2";
 
         [Header("MQTT Topics")]
         public string topic4json = "robot/path/json";
@@ -144,7 +151,7 @@ namespace M2MqttUnity
                 // Assign for MQTT buffer
                 relativeTrajectoryDouble[k] = (double)relative.x;
                 relativeTrajectoryDouble[k + 1] = (double)relative.y;
-                relativeTrajectoryDouble[k + 2] = 1;
+                relativeTrajectoryDouble[k + 2] = pt.z;
 
                 j++;
             }
@@ -166,5 +173,68 @@ namespace M2MqttUnity
         {
             Disconnect();
         }
+
+        string GetDynamicBrokerIP()
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+    string gateway = GetAndroidGatewayIP();
+#else
+            string gateway = GetPCGatewayIP();
+#endif
+
+            if (gateway == "Unknown") return "127.0.0.1"; // fallback
+
+            // Replace last octet with .100 (or whatever your broker is)
+            string[] parts = gateway.Split('.');
+            if (parts.Length == 4)
+            {
+                Debug.Log($"[MQTT] Gateway IP: {gateway}");
+                return $"{parts[0]}.{parts[1]}.{parts[2]}.{brokerIPLastDigit}"; // Change if your broker uses another IP
+            }
+
+            return "127.0.0.1";
+        }
+
+        string GetPCGatewayIP()
+        {
+            foreach (NetworkInterface f in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (f.OperationalStatus != OperationalStatus.Up)
+                    continue;
+
+                var ipProps = f.GetIPProperties();
+                foreach (GatewayIPAddressInformation d in ipProps.GatewayAddresses)
+                {
+                    if (d.Address.AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        return d.Address.ToString();
+                    }
+                }
+            }
+            return "Unknown";
+        }
+
+        string GetAndroidGatewayIP()
+        {
+            using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            using (AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+            using (AndroidJavaObject wifiManager = activity.Call<AndroidJavaObject>("getSystemService", "wifi"))
+            using (AndroidJavaObject dhcpInfo = wifiManager.Call<AndroidJavaObject>("getDhcpInfo"))
+            {
+                int ip = dhcpInfo.Get<int>("gateway");
+                return FormatIP(ip);
+            }
+        }
+
+        string FormatIP(int ip)
+        {
+            return string.Format("{0}.{1}.{2}.{3}",
+                (ip & 0xff),
+                (ip >> 8 & 0xff),
+                (ip >> 16 & 0xff),
+                (ip >> 24 & 0xff));
+        }
+
+
     }
 }
